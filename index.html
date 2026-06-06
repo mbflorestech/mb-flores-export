@@ -271,16 +271,33 @@
 
           if (tipo === 'moeda') {
             ws[cellRef] = { v: val, t: 'n', s: { numFmt: FMT_MOEDA } };
-          } else if (tipo === 'data' || tipo === 'datahora') {
+          } else if (tipo === 'data') {
             const d = parseData(val);
-            const serial = dateToExcel(d);
-            if (serial) {
-              ws[cellRef] = {
-                v: serial, t: 'n',
-                s: { numFmt: tipo === 'datahora' ? FMT_DATAHORA : FMT_DATA }
-              };
+            if (d) {
+              const dd = String(d.getDate()).padStart(2,'0');
+              const mm = String(d.getMonth()+1).padStart(2,'0');
+              const yy = d.getFullYear();
+              ws[cellRef] = { v: `${dd}/${mm}/${yy}`, t: 's' };
             } else {
               ws[cellRef] = { v: val || '', t: 's' };
+            }
+          } else if (tipo === 'datahora') {
+            const raw = String(val || '');
+            if (raw) {
+              // Airtable retorna ISO: 2026-04-01T14:30:00.000Z
+              const d = new Date(raw);
+              if (!isNaN(d.getTime())) {
+                const dd  = String(d.getDate()).padStart(2,'0');
+                const mm  = String(d.getMonth()+1).padStart(2,'0');
+                const yy  = d.getFullYear();
+                const hh  = String(d.getHours()).padStart(2,'0');
+                const min = String(d.getMinutes()).padStart(2,'0');
+                ws[cellRef] = { v: `${dd}/${mm}/${yy} ${hh}:${min}`, t: 's' };
+              } else {
+                ws[cellRef] = { v: raw, t: 's' };
+              }
+            } else {
+              ws[cellRef] = { v: '', t: 's' };
             }
           } else {
             ws[cellRef] = { v: String(val || ''), t: 's' };
