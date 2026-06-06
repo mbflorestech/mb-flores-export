@@ -64,7 +64,6 @@
     .toast{margin-top:1.25rem;padding:1rem 1.1rem;border-radius:10px;font-size:0.875rem;
       line-height:1.6;display:none;text-align:left}
     .toast.show{display:block}
-    .toast.info{background:#edf5f0;color:var(--green);border:1px solid #b3d9c2}
     .toast.success{background:#edf5f0;color:#155c2f;border:1px solid #6dbf8e}
     .toast.error{background:#fdf0ee;color:var(--red);border:1px solid #f0b0a8}
   </style>
@@ -100,20 +99,59 @@
   const BASE_ID        = 'appE7Y2kABDmDgYYn';
   const TABLE_ID       = 'tblsEqDfZrsOeI3H0';
 
-  const COLUNAS = [
-    'Número do Pedido','Nome do Cliente','Data do Pedido',
-    'CPF/CNPJ (from Clientes)','Telefone','E-mail',
-    'Nome do Falecido','Data de Sepultamento',
-    'Produto 1','Quantidade 1','Desconto 1 (R$)','Valor Total Item 1 (R$) (Manual)','Mensagem 1',
-    'Produto 2','Quantidade 2','Desconto 2 (R$)','Valor Total Item 2 (R$) (Manual)','Mensagem 2',
-    'Produto 3','Quantidade 3','Desconto 3 (R$)','Valor Total Item 3 (R$) (Manual)','Mensagem 3',
-    'Produto 4','Quantidade 4','Desconto 4 (R$)','Valor Total Item 4 (R$) (Manual)','Mensagem 4',
-    'Produto 5','Quantidade 5','Desconto 5 (R$)','Valor Total Item 5 (R$) (Manual)','Mensagem 5',
-    'Total do Pedido (R$) (Manual)','Forma de Pagamento','Pedido Pago?',
-    'Formato do Comprovante','Urgência do Pedido','Data e Hora de Entrega',
-    'Endereço de Entrega','Sala / Complemento','Observações Gerais do Pedido',
-    'Status do Pedido','Motivo do Cancelamento','Total de Produtos',
+  // Mapeamento: nome da coluna no Excel → campo real no Airtable
+  const MAPA_COLUNAS = [
+    { label: 'Número do Pedido',             campo: 'Número do Pedido',                      tipo: 'texto' },
+    { label: 'Nome do Cliente',              campo: 'Nome do Cliente',                        tipo: 'texto' },
+    { label: 'Data do Pedido',               campo: 'Data do Pedido',                         tipo: 'data' },
+    { label: 'CPF/CNPJ',                     campo: 'CPF/CNPJ (from Clientes)',               tipo: 'lookup' },
+    { label: 'Telefone',                     campo: 'Telefone',                               tipo: 'texto' },
+    { label: 'E-mail',                       campo: 'E-mail',                                 tipo: 'texto' },
+    { label: 'Nome do Falecido',             campo: 'Nome do Falecido',                       tipo: 'texto' },
+    { label: 'Data de Sepultamento',         campo: 'Data de Sepultamento',                   tipo: 'data' },
+    { label: 'Produto 1',                    campo: 'Descrição (from Produto 1)',              tipo: 'lookup' },
+    { label: 'Quantidade 1',                 campo: 'Quantidade 1',                           tipo: 'texto' },
+    { label: 'Desconto 1 (R$)',              campo: 'Desconto 1 (R$)',                        tipo: 'moeda' },
+    { label: 'Valor Total Item 1 (R$)',      campo: 'Valor Total Item 1 (R$) (Manual)',       tipo: 'moeda' },
+    { label: 'Mensagem 1',                   campo: 'Mensagem 1',                             tipo: 'texto' },
+    { label: 'Produto 2',                    campo: 'Descrição (from Produto 2)',              tipo: 'lookup' },
+    { label: 'Quantidade 2',                 campo: 'Quantidade 2',                           tipo: 'texto' },
+    { label: 'Desconto 2 (R$)',              campo: 'Desconto 2 (R$)',                        tipo: 'moeda' },
+    { label: 'Valor Total Item 2 (R$)',      campo: 'Valor Total Item 2 (R$) (Manual)',       tipo: 'moeda' },
+    { label: 'Mensagem 2',                   campo: 'Mensagem 2',                             tipo: 'texto' },
+    { label: 'Produto 3',                    campo: 'Descrição (from Produto 3)',              tipo: 'lookup' },
+    { label: 'Quantidade 3',                 campo: 'Quantidade 3',                           tipo: 'texto' },
+    { label: 'Desconto 3 (R$)',              campo: 'Desconto 3 (R$)',                        tipo: 'moeda' },
+    { label: 'Valor Total Item 3 (R$)',      campo: 'Valor Total Item 3 (R$) (Manual)',       tipo: 'moeda' },
+    { label: 'Mensagem 3',                   campo: 'Mensagem 3',                             tipo: 'texto' },
+    { label: 'Produto 4',                    campo: 'Descrição (from Produto 4)',              tipo: 'lookup' },
+    { label: 'Quantidade 4',                 campo: 'Quantidade 4',                           tipo: 'texto' },
+    { label: 'Desconto 4 (R$)',              campo: 'Desconto 4 (R$)',                        tipo: 'moeda' },
+    { label: 'Valor Total Item 4 (R$)',      campo: 'Valor Total Item 4 (R$) (Manual)',       tipo: 'moeda' },
+    { label: 'Mensagem 4',                   campo: 'Mensagem 4',                             tipo: 'texto' },
+    { label: 'Produto 5',                    campo: 'Descrição (from Produto 5)',              tipo: 'lookup' },
+    { label: 'Quantidade 5',                 campo: 'Quantidade 5',                           tipo: 'texto' },
+    { label: 'Desconto 5 (R$)',              campo: 'Desconto 5 (R$)',                        tipo: 'moeda' },
+    { label: 'Valor Total Item 5 (R$)',      campo: 'Valor Total Item 5 (R$) (Manual)',       tipo: 'moeda' },
+    { label: 'Mensagem 5',                   campo: 'Mensagem 5',                             tipo: 'texto' },
+    { label: 'Total do Pedido (R$)',         campo: 'Total do Pedido (R$) (Manual)',          tipo: 'moeda' },
+    { label: 'Forma de Pagamento',           campo: 'Forma de Pagamento',                     tipo: 'texto' },
+    { label: 'Pedido Pago?',                 campo: 'Pedido Pago?',                           tipo: 'texto' },
+    { label: 'Formato do Comprovante',       campo: 'Formato do Comprovante',                 tipo: 'texto' },
+    { label: 'Urgência do Pedido',           campo: 'Urgência do Pedido',                     tipo: 'texto' },
+    { label: 'Data e Hora de Entrega',       campo: 'Data e Hora de Entrega',                 tipo: 'datahora' },
+    { label: 'Endereço de Entrega',          campo: 'Endereço de Entrega',                    tipo: 'texto' },
+    { label: 'Sala / Complemento',           campo: 'Sala / Complemento',                     tipo: 'texto' },
+    { label: 'Observações',                  campo: 'Observações Gerais do Pedido',           tipo: 'texto' },
+    { label: 'Status do Pedido',             campo: 'Status do Pedido',                       tipo: 'texto' },
+    { label: 'Motivo do Cancelamento',       campo: 'Motivo do Cancelamento',                 tipo: 'texto' },
+    { label: 'Total de Produtos',            campo: 'Total de Produtos',                      tipo: 'texto' },
   ];
+
+  // Formato moeda BR
+  const FMT_MOEDA = 'R$ #,##0.00';
+  const FMT_DATA  = 'DD/MM/YYYY';
+  const FMT_DATAHORA = 'DD/MM/YYYY HH:MM';
 
   function setLoading(on) {
     document.getElementById('btn').disabled = on;
@@ -138,12 +176,46 @@
     el.innerHTML = html;
     el.className = `toast show ${type}`;
   }
-  function getValor(record, campo) {
+
+  // Extrai valor do campo — lookup retorna só o primeiro
+  function getValor(record, campo, tipo) {
     const v = record.fields[campo];
-    if (v === undefined || v === null) return '';
-    if (Array.isArray(v)) return v.map(i => typeof i === 'object' ? (i.name||i.text||i.value||'') : i).join(', ');
+    if (v === undefined || v === null) return tipo === 'moeda' ? 0 : '';
+
+    // Lookup / linked record array → pega só o primeiro
+    if (Array.isArray(v)) {
+      const f = v[0];
+      if (f === undefined || f === null) return tipo === 'moeda' ? 0 : '';
+      if (typeof f === 'object') return f.name || f.text || f.value || f.id || '';
+      return String(f);
+    }
+
     if (typeof v === 'object') return v.name || v.email || v.text || '';
-    return String(v);
+
+    // Moeda: converte string "R$ 1.234,56" → número
+    if (tipo === 'moeda') {
+      const n = parseFloat(String(v).replace(/[R$\s.]/g,'').replace(',','.'));
+      return isNaN(n) ? 0 : n;
+    }
+
+    return v;
+  }
+
+  // Converte string de data para objeto Date
+  function parseData(str) {
+    if (!str) return null;
+    let d = new Date(str);
+    if (!isNaN(d.getTime())) return d;
+    const p = String(str).split('/');
+    if (p.length === 3) { d = new Date(p[2], p[1]-1, p[0]); }
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  // Converte Date para número serial do Excel
+  function dateToExcel(d) {
+    if (!d) return '';
+    const epoch = new Date(1899, 11, 30);
+    return (d - epoch) / 86400000;
   }
 
   async function exportar() {
@@ -177,18 +249,54 @@
       activateStep(2);
       setProgress(65);
 
-      const rows = allRecords.map(record => {
-        const row = {};
-        COLUNAS.forEach(col => { row[col] = getValor(record, col); });
-        return row;
+      const headers = MAPA_COLUNAS.map(c => c.label);
+      const ws = {};
+      const range = { s:{r:0,c:0}, e:{r:allRecords.length, c:headers.length-1} };
+
+      // Cabeçalho com estilo verde
+      headers.forEach((h, c) => {
+        ws[XLSX.utils.encode_cell({r:0,c})] = {
+          v: h, t: 's',
+          s: { font:{bold:true,color:{rgb:'FFFFFF'},sz:10},
+               fill:{fgColor:{rgb:'1e3d2b'}},
+               alignment:{horizontal:'center',vertical:'center'} }
+        };
       });
 
-      const ws = XLSX.utils.json_to_sheet(rows, { header: COLUNAS });
-      ws['!cols'] = COLUNAS.map(col => ({ wch: Math.max(col.length + 2, 16) }));
+      // Dados
+      allRecords.forEach((record, ri) => {
+        MAPA_COLUNAS.forEach(({ campo, tipo }, c) => {
+          const val = getValor(record, campo, tipo);
+          const cellRef = XLSX.utils.encode_cell({r: ri+1, c});
+
+          if (tipo === 'moeda') {
+            ws[cellRef] = { v: val, t: 'n', s: { numFmt: FMT_MOEDA } };
+          } else if (tipo === 'data' || tipo === 'datahora') {
+            const d = parseData(val);
+            const serial = dateToExcel(d);
+            if (serial) {
+              ws[cellRef] = {
+                v: serial, t: 'n',
+                s: { numFmt: tipo === 'datahora' ? FMT_DATAHORA : FMT_DATA }
+              };
+            } else {
+              ws[cellRef] = { v: val || '', t: 's' };
+            }
+          } else {
+            ws[cellRef] = { v: String(val || ''), t: 's' };
+          }
+        });
+      });
+
+      ws['!ref'] = XLSX.utils.encode_range(range);
+      ws['!cols'] = MAPA_COLUNAS.map(c => ({ wch: Math.max(c.label.length + 2, 16) }));
+      ws['!rows'] = [{ hpt: 20 }];
+      ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Pedidos');
 
-      // ETAPA 3 — Download automático
+      // ETAPA 3 — Download
       activateStep(3);
       setProgress(90);
 
@@ -200,7 +308,7 @@
       setLoading(false);
       showToast(
         `✅ <strong>Download concluído!</strong><br>
-         Arquivo <strong>${filename}</strong> salvo com <strong>${allRecords.length} pedidos</strong>.`,
+         Arquivo <strong>${filename}</strong> com <strong>${allRecords.length} pedidos</strong>.`,
         'success'
       );
 
